@@ -27,9 +27,9 @@ local function defaultPaymentMethod(playerId, price)
 
 	if success then return true end
 
-	local money = ox_inventory:GetItemCount(source, 'money')
+	local money = ox_inventory:GetItemCount(playerId, 'money')
 
-	TriggerClientEvent('ox_lib:notify', source, {
+	TriggerClientEvent('ox_lib:notify', playerId, {
 		type = 'error',
 		description = locale('not_enough_money', price - money)
 	})
@@ -43,7 +43,7 @@ end)
 
 RegisterNetEvent('ox_fuel:pay', function(price, fuel, netid)
 	assert(type(price) == 'number', ('Price expected a number, received %s'):format(type(price)))
-
+	local source = source
 	if not payMoney(source, price) then return end
 
 	fuel = math.floor(fuel)
@@ -56,6 +56,7 @@ RegisterNetEvent('ox_fuel:pay', function(price, fuel, netid)
 end)
 
 RegisterNetEvent('ox_fuel:fuelCan', function(hasCan, price)
+	local source = source
 	if hasCan then
 		local item = ox_inventory:GetCurrentWeapon(source)
 
