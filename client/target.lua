@@ -4,71 +4,46 @@ local utils  = require 'client.utils'
 local fuel   = require 'client.fuel'
 
 if config.petrolCan.enabled then
-	exports.ox_target:addModel(config.pumpModels, {
-		{
-			distance = 2,
-			onSelect = function()
-				if utils.getMoney() >= config.priceTick then
-					fuel.startFueling(state.lastVehicle, 1)
-				else
-					lib.notify({ type = 'error', description = locale('refuel_cannot_afford') })
-				end
-			end,
-			icon = "fas fa-gas-pump",
-			label = locale('start_fueling'),
-			canInteract = function(entity)
-				if state.isFueling or cache.vehicle or lib.progressActive() then
-					return false
-				end
-
-				return state.lastVehicle and #(GetEntityCoords(state.lastVehicle) - GetEntityCoords(cache.ped)) <= 3
+	exports.sleepless_interact:addModel(config.pumpModels, {{
+		distance = 2,
+		onSelect = function()
+			if utils.getMoney() >= config.priceTick then
+				fuel.startFueling(state.lastVehicle, 1)
+			else
+				lib.notify({ type = 'error', description = locale('refuel_cannot_afford') })
 			end
-		},
-		{
-			distance = 2,
-			onSelect = function(data)
-				local petrolCan = config.petrolCan.enabled and GetSelectedPedWeapon(cache.ped) == `WEAPON_PETROLCAN`
-				local moneyAmount = utils.getMoney()
-
-				if moneyAmount < config.petrolCan.price then
-					return lib.notify({ type = 'error', description = locale('petrolcan_cannot_afford') })
-				end
-
-				return fuel.getPetrolCan(data.coords, petrolCan)
-			end,
-			icon = "fas fa-faucet",
-			label = locale('petrolcan_buy_or_refill'),
-		},
-	})
-else
-	exports.ox_target:addModel(config.pumpModels, {
-		{
-			distance = 2,
-			onSelect = function()
-				if utils.getMoney() >= config.priceTick then
-					if GetVehicleFuelLevel(state.lastVehicle) >= 100 then
-						return lib.notify({ type = 'error', description = locale('vehicle_full') })
-					end
-					fuel.startFueling(state.lastVehicle, 1)
-				else
-					lib.notify({ type = 'error', description = locale('refuel_cannot_afford') })
-				end
-			end,
-			icon = "fas fa-gas-pump",
-			label = locale('start_fueling'),
-			canInteract = function(entity)
-				if state.isFueling or cache.vehicle or not DoesVehicleUseFuel(state.lastVehicle) then
-					return false
-				end
-
-				return state.lastVehicle and #(GetEntityCoords(state.lastVehicle) - GetEntityCoords(cache.ped)) <= 3
+		end,
+		icon = "fas fa-gas-pump",
+		label = locale('start_fueling'),
+		canInteract = function(entity, distance, coords)
+			if state.isFueling or cache.vehicle or lib.progressActive() then
+				return false
 			end
-		},
-	})
+
+			return state.lastVehicle and #(GetEntityCoords(state.lastVehicle) - GetEntityCoords(cache.ped)) <= 3
+		end
+	},
+	{
+		distance = 2,
+		allowInVehicle = false,
+		onSelect = function(data)
+			local petrolCan = config.petrolCan.enabled and GetSelectedPedWeapon(cache.ped) == `WEAPON_PETROLCAN`
+			local moneyAmount = utils.getMoney()
+
+			if moneyAmount < config.petrolCan.price then
+				return lib.notify({ type = 'error', description = locale('petrolcan_cannot_afford') })
+			end
+
+			return fuel.getPetrolCan(data.coords, petrolCan)
+		end,
+		icon = "fas fa-faucet",
+		label = locale('petrolcan_buy_or_refill'),
+	}}
+	)
 end
 
 if config.petrolCan.enabled then
-	exports.ox_target:addGlobalVehicle({
+	exports.sleepless_interact:addGlobalVehicle({
 		{
 			distance = 2,
 			onSelect = function(data)

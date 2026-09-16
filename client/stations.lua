@@ -34,18 +34,7 @@ local function nearbyStation(point)
 				local playerCoords = GetEntityCoords(cache.ped)
 				pumpDistance = #(GetEntityCoords(cache.ped) - pump)
 
-				if cache.vehicle then
-					DisplayHelpTextThisFrame('fuelLeaveVehicleText', false)
-				elseif not state.isFueling then
-					local vehicleInRange = state.lastVehicle ~= 0 and
-						#(GetEntityCoords(state.lastVehicle) - playerCoords) <= 3
 
-					if vehicleInRange then
-						DisplayHelpTextThisFrame('fuelHelpText', false)
-					elseif config.petrolCan.enabled then
-						DisplayHelpTextThisFrame('petrolcanHelpText', false)
-					end
-				end
 
 				Wait(0)
 			until pumpDistance > 3
